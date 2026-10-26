@@ -16,14 +16,14 @@ const todayKey = getDateKey(today.getFullYear(), today.getMonth(), today.getDate
 
 function StatCard(props) {
     return (
-        <div className='flex items-center gap-3 rounded-2xl border bg-white p-4 md:p-5'>
-            <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 md:h-14 md:w-14'>
+        <div className={`flex items-center gap-3 rounded-2xl p-4 shadow-sm md:p-5 ${props.className}`}>
+            <div className='flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white-80  md:h-14 md:w-14'>
                 {props.icon}
             </div>
             <div>
-                <p className='text-sm text-gray-600 md:text-sm'>{props.label}</p>
-                <p className='text-2xl font-bold md:text-3xl'>{props.value}</p>
-                <p className='text-sm text-green-600 md:text-sm'>{props.note}</p>
+                <p className='text-xs text-gray-600 sm:text-sm'>{props.label}</p>
+                <p className='text-xl font-bold sm:text-2xl md:text-3xl'>{props.value}</p>
+                <p className='text-xs text-gray-500 md:text-sm'>{props.note}</p>
             </div>
         </div>
     )
@@ -119,77 +119,92 @@ function DashboardPage() {
             </p>
 
             {/* Stat cards */}
-            <div className='grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4'>
+            <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 md:gap-4'>
                 <StatCard
+                className="bg-blue-100"
                 icon={<Monitor />}
                 label='Desks booked today'
                 value={stats.deskBooked}
-                note={stats.desksAvailable + "available"} />
+                 />
 
                 <StatCard
+                className="bg-purple-100"
                 icon={<DoorOpen />}
                 label='Meeting rooms in use'
                 value={stats.roomsInUse}
-                note={stats.peopleChange + "% vs yesterday"} />
+                />
 
                 <StatCard
+                className="bg-green-100"
                 icon={<Users />}
                 label='People in office'
                 value={stats.peopleInOffice}
-                note={stats.peopleChange + "% vs yesterday"} />
+                />
             </div>
 
             {/* Bookings and Calendar */}
-            <div className='mt-6 grid grid-cols-1 gap-6 md:mt-8 lg:grid-cols-3'>
-                <section className='lg:col-span-2'>
-                    <h2 className='mb-3 text-base font-semibold md:mb-4 md:text-lg'>Your upcoming bookings</h2>
+           <div className='mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3'>
 
-                    {upcoming.length === 0 && (
-                        <p className='text-gray-500'>No upcoming bookings yet.</p>
-                    )}
+            {/* Upcoming Bookings*/}
+            <section className='lg:col-span-2'>
+                <h2 className='mb-4 text-lg font-semibold text-gray-800'>
+                    Your upcoming bookings
+                </h2>
+                {upcoming.length === 0 ? (
+                    <p className='text-gray-500'>No upcoming bookings yet.</p>
+                ) : (
+                    <div className='flex flex-col gap-4'>
+                        {upcoming.map((b) => (
+                            <div
+                            key={b.id}
+                            className={`flex gap-4 rounded-2xl p-4 shadow-sm ${b.type === "desk" ? "bg-blue-100" : "bg-purple-100"}`}>
+                    <div 
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl 
+                        ${b.type === "desk" ? "bg-blue-100 text-blue-600" : "bg-purple-100 text-purple-600"}`}
+                        >
+                    
+                        {b.type === "desk" ? <Monitor size={22} /> : <DoorOpen size={22} />} 
+                        </div>
 
-                    <div className='flex flex-col gap-3 md:gap-4'>
-                        {upcoming.map((b) =>(
-                            <div key={b.id} className='flex gap-3 rounded-2xl border bg-white p-3  md:p-4'>
-                                <div className='flex h-12 w-12 shrink-0 items-center justfify-center rounded-xl bg-blue-50 text-blue-600 md:h-16 md:w-16'>
-                                    {b.type === "desk" ? <Monitor /> : <DoorOpen />}
+                        <div className='min-w-0 flex-1'>
+                            <div className='flex flex-wrap items-center gap-2'>
+                                <h3 className='font-semibold text-gray-800'>{b.resource}</h3>
+                                <span className='rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700'>
+                                    Confirmed
+                                </span>
+                            </div>
+                            <div className='mt-1 space-y-1 text-sm text-gray-600'>
+                                <p className='flex items-center gap-1.5'>
+                                    <Calendar size={14} /> {b.dateText}
+                                </p>
+                                <p className='flex items-center gap-1.5'>
+                                    <MapPin size={14} /> {b.location}
+                                </p>
+                                <p className='flex items-center gap-1.5'>
+                                    <Clock size={14} /> {b.startTime} - {b.endTime}
+                                </p>
                                 </div>
-
-                    <div className='min-w-0'>
-                        <div className='flex flex-wrap items-center gap-2'>
-                            <h3 className='text-base font-semibold'>{b.resource}</h3>
-                            <span className='rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700'>
-                                Confirmed
-                            </span>
+                            </div>
                         </div>
-
-                        <p className='flex items-center gap-2 text-xs text-gray-600 md:text-sm'>
-                            <Calendar className='h-4 w-4 shrink-0' /> {b.dateText}
-                        </p>
-                        <p className='flex items-center gap-2 text-xs text-gray-600 md:text-sm'>
-                            <MapPin className='h-4 w-4' /> {b.location}
-                        </p>
-                        <p className='flex items-center gap-2 text-xs text-gray-600 md:text-sm'>
-                            <Clock className='h-4 w-4' /> {b.startTime} - {b.endTime}
-                        </p>
-                        </div>
-                    </div>
                         ))}
                     </div>
-                </section>
+                )}
+            </section>
 
-                <aside className='flex flex-col gap-4'>
+            {/* Calendar + Quick Book */}
+            <aside className='flex flex-col gap-4'>
+                <div className='rounded-2xl bg-purple-80 p-4 shadow-purple'>
                     <MiniCalendar />
-                    <Link to="/new-booking" className='flex items-center justfity-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-white hover:bg-blue-700'>
-                    <Plus className='h-5 w-5' />
+                </div>
+                <Link 
+                to="/new-booking"
+                className='flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-medium text-white shadow-sm transition hover:bg-blue-700'>
+                    <Plus size={18} />
                     Quick Book
-                    </Link>
-                    <p className='text-center text-sm text-gray-500'>
-                        Book a desk or room in seconds
-                    </p>
-                </aside>
+                </Link>
+            </aside>
             </div>
-        </div>
+           </div>
     )
 }
 

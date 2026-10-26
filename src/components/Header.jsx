@@ -16,7 +16,7 @@ function Header(props) {
     })
 
     return(
-        <header className='flex items-center justify-between border-b bg-white px-4 py-3 md:px-8 md:py-4'>
+        <header className='flex items-center justify-between  bg-white px-4 py-3 md:px-8 md:py-4'>
             <div className='flex min-w-0 items-center gap-2 md:gap-4'>
                 <button onClick={props.onToggle} className='shrink-0 rounded-lg p-2 hover:bg-gray-100'>
                     <Menu />
