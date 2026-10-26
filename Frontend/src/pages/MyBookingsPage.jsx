@@ -1,7 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { Monitor, DoorOpen, Calendar, Clock,X, Check, Plus, CheckCircle, XCircle } from "lucide-react"
-import { bookings as initialBookings} from "../data/mockData"
+
 
 function getDateKey(year, month, day) {
     let m = month + 1
@@ -16,26 +16,48 @@ const todayKey = getDateKey(now.getFullYear(), now.getMonth(), now.getDate())
 
 function MyBookingsPage() {
     const [ activeTab, setActiveTab ] = useState("upcoming")
-    const [ bookings, setBookings ] = useState(initialBookings)
+    
+    const [backendData, setBackendData] = useState([]);
+    useEffect(() => {
+        const API_URL = import.meta.env.VITE_API_URL;
+        fetch(`${API_URL}/api/bookings`)
+        .then((res) => res.json())
+        .then((data) => {
+            setBackendData(Array.isArray(data) ? data : []);
+        })
+        .catch((err) => console.error("API Error on bookings page:", err));
+    }, []);
 
     function cancelBooking(id) {
-        setBookings(prev =>
-            prev.map(booking =>
-                booking.id === id ? {...booking, status: "cancelled"} : booking
-            )
-        );
-        
+        if (!window.confirm("Are you sure you want to cancel this booking?"))
+            return;
+
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        fetch(`${API_URL}/api/bookings/${id}`, {
+            method: "DELETE",
+        })
+        .then((res) => {
+            if (!res.ok) throw new Error("Failed to delete booking from database");
+            return res.json();
+        })
+        .then(() => {
+            fetch(`${API_URL}/api/bookings`)
+            .then((res) => res.json())
+            .then((data) => setBackendData(Array.isArray(data) ? data : []));
+        })
+        .catch((err) => console.error("Cancellation error:", err))
     }
     function checkIn(id) {
-        setBookings(prev =>
+        setBackendData(prev =>
             prev.map(booking =>
                 booking.id === id ? {...booking, checkedIn: true} : booking
             )
         );
     }
 
-    const upcoming = bookings.filter((b) => b.status === "confirmed" && b.date >= todayKey)
-    const past = bookings.filter((b) => b.status !== "confirmed"|| b.date < todayKey)
+    const upcoming = backendData.filter((b) => b.status === "confirmed" && b.date >= todayKey)
+    const past = backendData.filter((b) => b.status !== "confirmed"|| b.date < todayKey)
 
     let list = upcoming 
     if (activeTab === "past") {

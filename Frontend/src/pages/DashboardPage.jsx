@@ -1,7 +1,7 @@
-import { useState} from 'react'
+import { useState, useEffect} from 'react'
 import { Link } from 'react-router-dom'
 import { Monitor, DoorOpen, Users, Calendar, MapPin, Clock, Plus } from 'lucide-react'
-import { bookings, stats } from "../data/mockData"
+import { bookings} from "../data/mockData"
 
 function getDateKey(year, month, day) {
     let m = month + 1
@@ -108,8 +108,21 @@ function MiniCalendar() {
 }
 
 function DashboardPage() {
-    const upcoming = bookings
-    .filter((b) => b.date >= todayKey)
+    const [ backendData, setBackendData ] = useState([]);
+
+    useEffect(() => {
+        const API_URL = import.meta.env.VITE_API_URL;
+
+        fetch(`${API_URL}/api/bookings`)
+        .then((res) => res.json())
+        .then((data) => {
+            console.log("Connected! Backend data:", data);
+            setBackendData(data);
+        })
+        .catch((err) => console.error("API Error", err));
+    }, [])
+    const upcoming = backendData
+    .filter((b) => b.status === "confirmed" && b.date >= todayKey)
     .slice(0, 2)
 
     return (
@@ -124,21 +137,21 @@ function DashboardPage() {
                 className="bg-blue-100"
                 icon={<Monitor />}
                 label='Desks booked today'
-                value={stats.deskBooked}
+                value={backendData.filter(b => b.status === "confirmed" && b.resource === "desk").length}
                  />
 
                 <StatCard
                 className="bg-purple-100"
                 icon={<DoorOpen />}
                 label='Meeting rooms in use'
-                value={stats.roomsInUse}
+                value={backendData.filter(b => b.status === "confirmed" && b.resource === "room").length}
                 />
 
                 <StatCard
                 className="bg-green-100"
                 icon={<Users />}
                 label='People in office'
-                value={stats.peopleInOffice}
+                value={backendData.filter(b => b.status === "confirmed").length}
                 />
             </div>
 

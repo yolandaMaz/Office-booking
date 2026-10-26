@@ -77,26 +77,37 @@ function NewBookingPage() {
             setMessage("Please enter a valid email address.")
             return
         }
-        const parts = selectedSlot.split("-")
+        
 
         const newBooking = {
-            id: bookings.length + 1,
-            type: resourceType,
-            resource: resourceType === "desk" ? "Desk" : "Meeting Room",
-            location: "Floor 2",
+            resource: resourceType,
             date: selectedDate,
-            dateText: selectedDate,
-            startTime: parts[0],
-            endTime: parts[1],
+            slot: selectedSlot,
             name: fullName,
             email: email,
-            status: "confirmed",
-        }
-        bookings.push(newBooking)
-        setMessage("Booking confirmed!")
-        setSelectedSlot("")
-        setFullName("")
-        setEmail("")
+        };
+       const API_URL = import.meta.env.VITE_API_URL;
+
+       fetch(`${API_URL}/api/bookings`, {
+        method: "POST",
+        headers: {
+            "Content-Type" : "application/json",
+        },
+        body: JSON.stringify(newBooking),
+       })
+       .then((res) => {
+        if (!res.ok) throw new Error("Failed to save booking");
+        return res.json();
+       })
+       .then(() => {
+        setMessage("Booking successfully saved to database!");
+        setFullName("");
+        setEmail("");
+       })
+       .catch((err) => {
+        console.error("API Error", err);
+        setMessage("Error: Could not complete your booking request.")
+       })
     }
 
     let deskClass = 'flex w-full items-center gap-3 rounded-xl border bg-white p-3 text-left md:gap-4 md:p-4'
