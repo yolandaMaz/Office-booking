@@ -137,14 +137,14 @@ function DashboardPage() {
                 className="bg-blue-100"
                 icon={<Monitor />}
                 label='Desks booked today'
-                value={backendData.filter(b => b.status === "confirmed" && b.resource === "desk").length}
+                value={backendData.filter(b => b.status === "confirmed" && b.resource?.toLowerCase() === "desk").length}
                  />
 
                 <StatCard
                 className="bg-purple-100"
                 icon={<DoorOpen />}
                 label='Meeting rooms in use'
-                value={backendData.filter(b => b.status === "confirmed" && b.resource === "room").length}
+                value={backendData.filter(b => b.status === "confirmed" && b.resource?.toLowerCase() === "room").length}
                 />
 
                 <StatCard
